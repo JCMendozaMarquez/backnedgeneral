@@ -1,0 +1,25 @@
+
+# Ejecutables
+*.exe
+backend
+programa
+
+# Archivos compilados
+*.o
+*.obj
+*.a
+*.so
+*.dll
+
+# Carpetas de compilación
+build/
+bin/
+dist/
+
+# Configuración local y secretos
+.env
+.env.local
+
+# Archivos temporales
+*.tmp
+*.log
