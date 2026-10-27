@@ -134,3 +134,4 @@ C:\Users\ADMIN\Desktop\Mapa\PlantillaGeneral\BackendGeneral\BackendGeneral.Api\o
 C:\Users\ADMIN\Desktop\Mapa\PlantillaGeneral\BackendGeneral\BackendGeneral.Api\obj\Debug\net10.0\BackendGeneral.Api.pdb
 C:\Users\ADMIN\Desktop\Mapa\PlantillaGeneral\BackendGeneral\BackendGeneral.Api\obj\Debug\net10.0\BackendGeneral.Api.genruntimeconfig.cache
 C:\Users\ADMIN\Desktop\Mapa\PlantillaGeneral\BackendGeneral\BackendGeneral.Api\obj\Debug\net10.0\ref\BackendGeneral.Api.dll
+C:\Users\ADMIN\Desktop\Mapa\PlantillaGeneral\BackendGeneral\BackendGeneral.Api\obj\Debug\net10.0\BackendGeneral.Api.sourcelink.json

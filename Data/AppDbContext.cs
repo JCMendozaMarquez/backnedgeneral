@@ -26,6 +26,11 @@ public class AppDbContext : DbContext
     // ─── Ventas ───
     public DbSet<Venta> Ventas => Set<Venta>();
 
+    // ─── Proyectos / Curva S ───
+public DbSet<Project> Projects => Set<Project>();
+public DbSet<ProjectTask> ProjectTasks => Set<ProjectTask>();
+public DbSet<ProjectSCurvePoint> ProjectSCurvePoints => Set<ProjectSCurvePoint>();
+
     protected override void OnModelCreating(ModelBuilder mb)
     {
         base.OnModelCreating(mb);
@@ -254,5 +259,62 @@ public class AppDbContext : DbContext
             e.HasOne(x => x.Usuario).WithMany()
                 .HasForeignKey(x => x.UsuarioId).OnDelete(DeleteBehavior.Restrict);
         });
+
+        // ═════════════════════════════════════════════════════════
+// NUEVO: PROYECTOS Y ACTIVIDADES
+// ═════════════════════════════════════════════════════════
+mb.Entity<Project>(e =>
+{
+    e.ToTable("projects");
+    e.HasKey(x => x.Id);
+    e.Property(x => x.Id).HasColumnName("id");
+    e.Property(x => x.Code).HasColumnName("code").HasMaxLength(50);
+    e.Property(x => x.Name).HasColumnName("name").HasMaxLength(200).IsRequired();
+    e.Property(x => x.Description).HasColumnName("description");
+    e.Property(x => x.StartDate).HasColumnName("start_date");
+    e.Property(x => x.EndDate).HasColumnName("end_date");
+    e.Property(x => x.Status).HasColumnName("status").HasMaxLength(30);
+    e.HasIndex(x => x.Code);
+});
+
+mb.Entity<ProjectTask>(e =>
+{
+    e.ToTable("project_tasks");
+    e.HasKey(x => x.Id);
+    e.Property(x => x.Id).HasColumnName("id");
+    e.Property(x => x.ProjectId).HasColumnName("project_id");
+    e.Property(x => x.Code).HasColumnName("code").HasMaxLength(50);
+    e.Property(x => x.Name).HasColumnName("name").HasMaxLength(200).IsRequired();
+    e.Property(x => x.Weight).HasColumnName("weight").HasColumnType("numeric(5,2)");
+    e.Property(x => x.PlannedStart).HasColumnName("planned_start");
+    e.Property(x => x.PlannedEnd).HasColumnName("planned_end");
+    e.Property(x => x.ActualStart).HasColumnName("actual_start");
+    e.Property(x => x.ActualEnd).HasColumnName("actual_end");
+    e.Property(x => x.Progress).HasColumnName("progress").HasColumnType("numeric(5,2)");
+    e.Property(x => x.Status).HasColumnName("status").HasMaxLength(30);
+
+    e.HasOne<Project>()
+     .WithMany()
+     .HasForeignKey(x => x.ProjectId)
+     .OnDelete(DeleteBehavior.Cascade);
+
+    e.HasIndex(x => x.ProjectId);
+});
+
+// ═════════════════════════════════════════════════════════
+// NUEVO: VISTA CURVA S (sin clave, solo lectura)
+// ═════════════════════════════════════════════════════════
+mb.Entity<ProjectSCurvePoint>(e =>
+{
+    e.HasNoKey();
+    e.ToView("v_project_scurve");
+
+    e.Property(x => x.ProjectId).HasColumnName("project_id");
+    e.Property(x => x.MonthStart).HasColumnName("month_start");
+    e.Property(x => x.MonthKey).HasColumnName("month_key");
+    e.Property(x => x.MonthLabel).HasColumnName("month_label");
+    e.Property(x => x.Planned).HasColumnName("planned").HasColumnType("numeric");
+    e.Property(x => x.Actual).HasColumnName("actual").HasColumnType("numeric");
+});
     }
 }
