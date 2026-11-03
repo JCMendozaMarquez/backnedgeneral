@@ -1,0 +1,5 @@
+[phases.setup]
+nixPkgs = ["dotnet-sdk_10"]
+
+[phases.build]
+cmds = ["dotnet publish BackendGeneral.Api.csproj -c Release -o out"]
