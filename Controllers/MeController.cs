@@ -56,15 +56,13 @@ public class MeController : ControllerBase
         }
 
         // Los demás ven solo los que su rol permite
-        var modulos = await _db.Database
-            .SqlQueryRaw<MenuRow>(@"
-                SELECT module_id AS ""ModuleId"", name AS ""Name"", code AS ""Code"",
-                       icon AS ""Icon"", route AS ""Route"", parent_id AS ""ParentId"",
-                       order_index AS ""OrderIndex""
-                FROM v_user_modules
-                WHERE user_id = {0}
-                ORDER BY order_index", userId)
-            .ToListAsync();
+var modulos = await _db.Database
+    .SqlQueryRaw<MenuRow>(@"
+        SELECT module_id, name, code, icon, route, parent_id, order_index
+        FROM v_user_modules
+        WHERE user_id = {0}
+        ORDER BY order_index", userId)
+    .ToListAsync();
 
         return Ok(modulos);
     }

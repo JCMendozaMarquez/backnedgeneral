@@ -27,15 +27,31 @@ public class AppDbContext : DbContext
     public DbSet<Venta> Ventas => Set<Venta>();
 
     // ─── Proyectos / Curva S ───
-public DbSet<Project> Projects => Set<Project>();
-public DbSet<ProjectTask> ProjectTasks => Set<ProjectTask>();
-public DbSet<ProjectSCurvePoint> ProjectSCurvePoints => Set<ProjectSCurvePoint>();
+    public DbSet<Project> Projects => Set<Project>();
+    public DbSet<ProjectTask> ProjectTasks => Set<ProjectTask>();
+    public DbSet<ProjectSCurvePoint> ProjectSCurvePoints => Set<ProjectSCurvePoint>();
+
+    // ─── Restaurante ───
+    public DbSet<Tercero> Terceros => Set<Tercero>();
+    public DbSet<Categoria> Categorias => Set<Categoria>();
+    public DbSet<Articulo> Articulos => Set<Articulo>();
+    public DbSet<Promocion> Promociones => Set<Promocion>();
+    public DbSet<Receta> Recetas => Set<Receta>();
+    public DbSet<TurnoCaja> TurnosCaja => Set<TurnoCaja>();
+    public DbSet<Pedido> Pedidos => Set<Pedido>();
+    public DbSet<PedidoItem> PedidoItems => Set<PedidoItem>();
+    public DbSet<Pago> Pagos => Set<Pago>();
+    public DbSet<Gasto> Gastos => Set<Gasto>();
+    public DbSet<MovimientoInventario> MovimientosInventario => Set<MovimientoInventario>();
+    public DbSet<Mensaje> Mensajes => Set<Mensaje>();
 
     protected override void OnModelCreating(ModelBuilder mb)
     {
         base.OnModelCreating(mb);
 
+        // ═════════════════════════════════════════════════════════
         // USERS
+        // ═════════════════════════════════════════════════════════
         mb.Entity<Usuario>(e =>
         {
             e.ToTable("users");
@@ -58,7 +74,9 @@ public DbSet<ProjectSCurvePoint> ProjectSCurvePoints => Set<ProjectSCurvePoint>(
             e.HasIndex(x => x.Username).IsUnique();
         });
 
+        // ═════════════════════════════════════════════════════════
         // ROLES
+        // ═════════════════════════════════════════════════════════
         mb.Entity<Rol>(e =>
         {
             e.ToTable("roles");
@@ -73,7 +91,9 @@ public DbSet<ProjectSCurvePoint> ProjectSCurvePoints => Set<ProjectSCurvePoint>(
             e.HasIndex(x => x.Code).IsUnique();
         });
 
+        // ═════════════════════════════════════════════════════════
         // PERMISSIONS
+        // ═════════════════════════════════════════════════════════
         mb.Entity<Permiso>(e =>
         {
             e.ToTable("permissions");
@@ -88,7 +108,9 @@ public DbSet<ProjectSCurvePoint> ProjectSCurvePoints => Set<ProjectSCurvePoint>(
             e.HasIndex(x => x.Code).IsUnique();
         });
 
+        // ═════════════════════════════════════════════════════════
         // MODULES
+        // ═════════════════════════════════════════════════════════
         mb.Entity<Modulo>(e =>
         {
             e.ToTable("modules");
@@ -110,7 +132,9 @@ public DbSet<ProjectSCurvePoint> ProjectSCurvePoints => Set<ProjectSCurvePoint>(
                 .HasForeignKey(x => x.ParentId).OnDelete(DeleteBehavior.SetNull);
         });
 
+        // ═════════════════════════════════════════════════════════
         // USER_ROLES
+        // ═════════════════════════════════════════════════════════
         mb.Entity<UsuarioRol>(e =>
         {
             e.ToTable("user_roles");
@@ -124,7 +148,9 @@ public DbSet<ProjectSCurvePoint> ProjectSCurvePoints => Set<ProjectSCurvePoint>(
                 .HasForeignKey(x => x.RoleId).OnDelete(DeleteBehavior.Cascade);
         });
 
+        // ═════════════════════════════════════════════════════════
         // ROLE_PERMISSIONS
+        // ═════════════════════════════════════════════════════════
         mb.Entity<RolPermiso>(e =>
         {
             e.ToTable("role_permissions");
@@ -138,7 +164,9 @@ public DbSet<ProjectSCurvePoint> ProjectSCurvePoints => Set<ProjectSCurvePoint>(
                 .HasForeignKey(x => x.PermissionId).OnDelete(DeleteBehavior.Cascade);
         });
 
+        // ═════════════════════════════════════════════════════════
         // ROLE_MODULES
+        // ═════════════════════════════════════════════════════════
         mb.Entity<RolModulo>(e =>
         {
             e.ToTable("role_modules");
@@ -152,7 +180,9 @@ public DbSet<ProjectSCurvePoint> ProjectSCurvePoints => Set<ProjectSCurvePoint>(
                 .HasForeignKey(x => x.ModuleId).OnDelete(DeleteBehavior.Cascade);
         });
 
+        // ═════════════════════════════════════════════════════════
         // REFRESH_TOKENS
+        // ═════════════════════════════════════════════════════════
         mb.Entity<RefreshToken>(e =>
         {
             e.ToTable("refresh_tokens");
@@ -171,7 +201,9 @@ public DbSet<ProjectSCurvePoint> ProjectSCurvePoints => Set<ProjectSCurvePoint>(
                 .HasForeignKey(x => x.ReplacedByTokenId).OnDelete(DeleteBehavior.SetNull);
         });
 
+        // ═════════════════════════════════════════════════════════
         // AUDIT_LOGS
+        // ═════════════════════════════════════════════════════════
         mb.Entity<AuditLog>(e =>
         {
             e.ToTable("audit_logs");
@@ -189,7 +221,9 @@ public DbSet<ProjectSCurvePoint> ProjectSCurvePoints => Set<ProjectSCurvePoint>(
                 .HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.SetNull);
         });
 
+        // ═════════════════════════════════════════════════════════
         // LOGIN_ATTEMPTS
+        // ═════════════════════════════════════════════════════════
         mb.Entity<LoginAttempt>(e =>
         {
             e.ToTable("login_attempts");
@@ -205,7 +239,9 @@ public DbSet<ProjectSCurvePoint> ProjectSCurvePoints => Set<ProjectSCurvePoint>(
                 .HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.SetNull);
         });
 
+        // ═════════════════════════════════════════════════════════
         // PASSWORD_RESET_TOKENS
+        // ═════════════════════════════════════════════════════════
         mb.Entity<PasswordResetToken>(e =>
         {
             e.ToTable("password_reset_tokens");
@@ -221,7 +257,9 @@ public DbSet<ProjectSCurvePoint> ProjectSCurvePoints => Set<ProjectSCurvePoint>(
                 .HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
         });
 
+        // ═════════════════════════════════════════════════════════
         // SYSTEM_SETTINGS
+        // ═════════════════════════════════════════════════════════
         mb.Entity<SystemSetting>(e =>
         {
             e.ToTable("system_settings");
@@ -237,7 +275,7 @@ public DbSet<ProjectSCurvePoint> ProjectSCurvePoints => Set<ProjectSCurvePoint>(
         });
 
         // ═════════════════════════════════════════════════════════
-        // NUEVO: VENTAS
+        // VENTAS
         // ═════════════════════════════════════════════════════════
         mb.Entity<Venta>(e =>
         {
@@ -261,60 +299,147 @@ public DbSet<ProjectSCurvePoint> ProjectSCurvePoints => Set<ProjectSCurvePoint>(
         });
 
         // ═════════════════════════════════════════════════════════
-// NUEVO: PROYECTOS Y ACTIVIDADES
-// ═════════════════════════════════════════════════════════
-mb.Entity<Project>(e =>
-{
-    e.ToTable("projects");
-    e.HasKey(x => x.Id);
-    e.Property(x => x.Id).HasColumnName("id");
-    e.Property(x => x.Code).HasColumnName("code").HasMaxLength(50);
-    e.Property(x => x.Name).HasColumnName("name").HasMaxLength(200).IsRequired();
-    e.Property(x => x.Description).HasColumnName("description");
-    e.Property(x => x.StartDate).HasColumnName("start_date");
-    e.Property(x => x.EndDate).HasColumnName("end_date");
-    e.Property(x => x.Status).HasColumnName("status").HasMaxLength(30);
-    e.HasIndex(x => x.Code);
-});
+        // PROYECTOS Y ACTIVIDADES
+        // ═════════════════════════════════════════════════════════
+        mb.Entity<Project>(e =>
+        {
+            e.ToTable("projects");
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).HasColumnName("id");
+            e.Property(x => x.Code).HasColumnName("code").HasMaxLength(50);
+            e.Property(x => x.Name).HasColumnName("name").HasMaxLength(200).IsRequired();
+            e.Property(x => x.Description).HasColumnName("description");
+            e.Property(x => x.StartDate).HasColumnName("start_date");
+            e.Property(x => x.EndDate).HasColumnName("end_date");
+            e.Property(x => x.Status).HasColumnName("status").HasMaxLength(30);
+            e.HasIndex(x => x.Code);
+        });
 
-mb.Entity<ProjectTask>(e =>
-{
-    e.ToTable("project_tasks");
-    e.HasKey(x => x.Id);
-    e.Property(x => x.Id).HasColumnName("id");
-    e.Property(x => x.ProjectId).HasColumnName("project_id");
-    e.Property(x => x.Code).HasColumnName("code").HasMaxLength(50);
-    e.Property(x => x.Name).HasColumnName("name").HasMaxLength(200).IsRequired();
-    e.Property(x => x.Weight).HasColumnName("weight").HasColumnType("numeric(5,2)");
-    e.Property(x => x.PlannedStart).HasColumnName("planned_start");
-    e.Property(x => x.PlannedEnd).HasColumnName("planned_end");
-    e.Property(x => x.ActualStart).HasColumnName("actual_start");
-    e.Property(x => x.ActualEnd).HasColumnName("actual_end");
-    e.Property(x => x.Progress).HasColumnName("progress").HasColumnType("numeric(5,2)");
-    e.Property(x => x.Status).HasColumnName("status").HasMaxLength(30);
+        mb.Entity<ProjectTask>(e =>
+        {
+            e.ToTable("project_tasks");
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).HasColumnName("id");
+            e.Property(x => x.ProjectId).HasColumnName("project_id");
+            e.Property(x => x.Code).HasColumnName("code").HasMaxLength(50);
+            e.Property(x => x.Name).HasColumnName("name").HasMaxLength(200).IsRequired();
+            e.Property(x => x.Weight).HasColumnName("weight").HasColumnType("numeric(5,2)");
+            e.Property(x => x.PlannedStart).HasColumnName("planned_start");
+            e.Property(x => x.PlannedEnd).HasColumnName("planned_end");
+            e.Property(x => x.ActualStart).HasColumnName("actual_start");
+            e.Property(x => x.ActualEnd).HasColumnName("actual_end");
+            e.Property(x => x.Progress).HasColumnName("progress").HasColumnType("numeric(5,2)");
+            e.Property(x => x.Status).HasColumnName("status").HasMaxLength(30);
 
-    e.HasOne<Project>()
-     .WithMany()
-     .HasForeignKey(x => x.ProjectId)
-     .OnDelete(DeleteBehavior.Cascade);
+            e.HasOne<Project>()
+             .WithMany()
+             .HasForeignKey(x => x.ProjectId)
+             .OnDelete(DeleteBehavior.Cascade);
 
-    e.HasIndex(x => x.ProjectId);
-});
+            e.HasIndex(x => x.ProjectId);
+        });
 
-// ═════════════════════════════════════════════════════════
-// NUEVO: VISTA CURVA S (sin clave, solo lectura)
-// ═════════════════════════════════════════════════════════
-mb.Entity<ProjectSCurvePoint>(e =>
-{
-    e.HasNoKey();
-    e.ToView("v_project_scurve");
+        // ═════════════════════════════════════════════════════════
+        // VISTA CURVA S (sin clave, solo lectura)
+        // ═════════════════════════════════════════════════════════
+        mb.Entity<ProjectSCurvePoint>(e =>
+        {
+            e.HasNoKey();
+            e.ToView("v_project_scurve");
 
-    e.Property(x => x.ProjectId).HasColumnName("project_id");
-    e.Property(x => x.MonthStart).HasColumnName("month_start");
-    e.Property(x => x.MonthKey).HasColumnName("month_key");
-    e.Property(x => x.MonthLabel).HasColumnName("month_label");
-    e.Property(x => x.Planned).HasColumnName("planned").HasColumnType("numeric");
-    e.Property(x => x.Actual).HasColumnName("actual").HasColumnType("numeric");
-});
+            e.Property(x => x.ProjectId).HasColumnName("project_id");
+            e.Property(x => x.MonthStart).HasColumnName("month_start");
+            e.Property(x => x.MonthKey).HasColumnName("month_key");
+            e.Property(x => x.MonthLabel).HasColumnName("month_label");
+            e.Property(x => x.Planned).HasColumnName("planned").HasColumnType("numeric");
+            e.Property(x => x.Actual).HasColumnName("actual").HasColumnType("numeric");
+        });
+
+        // ═════════════════════════════════════════════════════════
+        // RESTAURANTE
+        // ═════════════════════════════════════════════════════════
+
+        mb.Entity<Tercero>(e =>
+        {
+            e.ToTable("terceros");
+            e.Property(x => x.Datos).HasColumnType("jsonb");
+        });
+
+        mb.Entity<Categoria>(e =>
+        {
+            e.ToTable("categorias");
+            e.Property(x => x.VisibleEn).HasColumnType("text[]");
+        });
+
+        mb.Entity<Articulo>(e =>
+        {
+            e.ToTable("articulos");
+            e.Property(x => x.Opciones).HasColumnType("jsonb");
+            e.Property(x => x.Atributos).HasColumnType("jsonb");
+            e.Property(x => x.VisibleEn).HasColumnType("text[]");
+
+            e.HasOne(x => x.Categoria)
+             .WithMany()
+             .HasForeignKey(x => x.CategoriaId)
+             .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        mb.Entity<Promocion>(e =>
+        {
+            e.ToTable("promociones");
+            e.Property(x => x.Reglas).HasColumnType("jsonb");
+        });
+
+        mb.Entity<Receta>(e =>
+        {
+            e.ToTable("recetas");
+            e.HasIndex(x => new { x.ArticuloId, x.MaterialId }).IsUnique();
+        });
+
+        mb.Entity<TurnoCaja>(e => e.ToTable("turnos_caja"));
+
+        mb.Entity<Pedido>(e =>
+        {
+            e.ToTable("pedidos");
+            e.Property(x => x.Datos).HasColumnType("jsonb");
+            e.HasMany(x => x.Items)
+             .WithOne()
+             .HasForeignKey(i => i.PedidoId)
+             .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        mb.Entity<PedidoItem>(e =>
+        {
+            e.ToTable("pedido_items");
+            e.Property(x => x.Opciones).HasColumnType("jsonb");
+            // Columna GENERATED ALWAYS en Postgres → solo lectura para EF
+            e.Property(x => x.Total).ValueGeneratedOnAddOrUpdate();
+        });
+
+        mb.Entity<Pago>(e =>
+        {
+            e.ToTable("pagos");
+            e.Property(x => x.Datos).HasColumnType("jsonb");
+        });
+
+        mb.Entity<Gasto>(e =>
+        {
+            e.ToTable("gastos");
+            e.Property(x => x.Datos).HasColumnType("jsonb");
+            e.Property(x => x.Fecha).HasColumnType("date");
+        });
+
+        mb.Entity<MovimientoInventario>(e =>
+        {
+            e.ToTable("movimientos_inventario");
+            e.Property(x => x.Cantidad).HasColumnType("numeric(14,3)");
+            e.Property(x => x.CostoUnitario).HasColumnType("numeric(12,4)");
+        });
+
+        mb.Entity<Mensaje>(e =>
+        {
+            e.ToTable("mensajes");
+            e.Property(x => x.Datos).HasColumnType("jsonb");
+        });
     }
 }

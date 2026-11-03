@@ -1,10 +1,11 @@
 {
   "version": 2,
-  "dgSpecHash": "jOJdeEkyIB0=",
+  "dgSpecHash": "dlDltTzOlmA=",
   "success": true,
-  "projectFilePath": "C:\\Users\\ADMIN\\Desktop\\Mapa\\PlantillaGeneral\\BackendGeneral\\BackendGeneral.Api\\BackendGeneral.Api.csproj",
+  "projectFilePath": "C:\\Users\\ADMIN\\Desktop\\TrabajosExtras\\Restaurante\\backendgeneral\\BackendGeneral.Api.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\ADMIN\\.nuget\\packages\\bcrypt.net-next\\4.2.0\\bcrypt.net-next.4.2.0.nupkg.sha512",
+    "C:\\Users\\ADMIN\\.nuget\\packages\\efcore.namingconventions\\10.0.1\\efcore.namingconventions.10.0.1.nupkg.sha512",
     "C:\\Users\\ADMIN\\.nuget\\packages\\humanizer.core\\2.14.1\\humanizer.core.2.14.1.nupkg.sha512",
     "C:\\Users\\ADMIN\\.nuget\\packages\\microsoft.aspnetcore.authentication.jwtbearer\\10.0.12\\microsoft.aspnetcore.authentication.jwtbearer.10.0.12.nupkg.sha512",
     "C:\\Users\\ADMIN\\.nuget\\packages\\microsoft.aspnetcore.openapi\\10.0.8\\microsoft.aspnetcore.openapi.10.0.8.nupkg.sha512",

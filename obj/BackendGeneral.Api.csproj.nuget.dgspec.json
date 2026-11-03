@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\ADMIN\\Desktop\\Mapa\\PlantillaGeneral\\BackendGeneral\\BackendGeneral.Api\\BackendGeneral.Api.csproj": {}
+    "C:\\Users\\ADMIN\\Desktop\\TrabajosExtras\\Restaurante\\backendgeneral\\BackendGeneral.Api.csproj": {}
   },
   "projects": {
-    "C:\\Users\\ADMIN\\Desktop\\Mapa\\PlantillaGeneral\\BackendGeneral\\BackendGeneral.Api\\BackendGeneral.Api.csproj": {
+    "C:\\Users\\ADMIN\\Desktop\\TrabajosExtras\\Restaurante\\backendgeneral\\BackendGeneral.Api.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\ADMIN\\Desktop\\Mapa\\PlantillaGeneral\\BackendGeneral\\BackendGeneral.Api\\BackendGeneral.Api.csproj",
+        "projectUniqueName": "C:\\Users\\ADMIN\\Desktop\\TrabajosExtras\\Restaurante\\backendgeneral\\BackendGeneral.Api.csproj",
         "projectName": "BackendGeneral.Api",
-        "projectPath": "C:\\Users\\ADMIN\\Desktop\\Mapa\\PlantillaGeneral\\BackendGeneral\\BackendGeneral.Api\\BackendGeneral.Api.csproj",
+        "projectPath": "C:\\Users\\ADMIN\\Desktop\\TrabajosExtras\\Restaurante\\backendgeneral\\BackendGeneral.Api.csproj",
         "packagesPath": "C:\\Users\\ADMIN\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\ADMIN\\Desktop\\Mapa\\PlantillaGeneral\\BackendGeneral\\BackendGeneral.Api\\obj\\",
+        "outputPath": "C:\\Users\\ADMIN\\Desktop\\TrabajosExtras\\Restaurante\\backendgeneral\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\ADMIN\\AppData\\Roaming\\NuGet\\NuGet.Config",
@@ -51,6 +51,10 @@
             "BCrypt.Net-Next": {
               "target": "Package",
               "version": "[4.2.0, )"
+            },
+            "EFCore.NamingConventions": {
+              "target": "Package",
+              "version": "[10.0.1, )"
             },
             "Microsoft.AspNetCore.Authentication.JwtBearer": {
               "target": "Package",

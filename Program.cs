@@ -21,6 +21,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(
         builder.Configuration.GetConnectionString("DefaultConnection")
     )
+     .UseSnakeCaseNamingConvention()
 );
 
 // ═══════════════════════════════════════════════════════════
@@ -65,6 +66,31 @@ builder.Services.AddScoped<JwtService>();
 builder.Services.AddScoped<AuthService>();
 
 // ═══════════════════════════════════════════════════════════
+// SERVICIOS DE NEGOCIO (6 módulos)
+// ═══════════════════════════════════════════════════════════
+
+// Helper reutilizable para leer vistas y funciones SQL
+builder.Services.AddScoped<DbViewsService>();
+
+// Módulo 1: Catálogo
+builder.Services.AddScoped<CatalogoService>();
+
+// Módulo 2: Pedidos
+builder.Services.AddScoped<PedidosService>();
+
+// Módulo 3: Cobros y caja
+builder.Services.AddScoped<CobrosCajaService>();
+
+// Módulo 4: Inventario
+builder.Services.AddScoped<InventarioService>();
+
+// Módulo 5: Integraciones (mensajes)
+builder.Services.AddScoped<IntegracionesService>();
+
+// Módulo 6: Reportes
+builder.Services.AddScoped<ReportesService>();
+
+// ═══════════════════════════════════════════════════════════
 // JWT
 // ═══════════════════════════════════════════════════════════
 
@@ -103,6 +129,7 @@ builder.Services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProv
 
 // Autorización por defecto (sin policies hardcodeadas)
 builder.Services.AddAuthorization();
+
 // ═══════════════════════════════════════════════════════════
 // CORS
 // ═══════════════════════════════════════════════════════════
@@ -131,36 +158,45 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 
 // ═══════════════════════════════════════════════════════════
-// Scalar
+// Scalar con hostless
 // ═══════════════════════════════════════════════════════════
 
-if (app.Environment.IsDevelopment())
+
+// ═══════════════════════════════════════════════════════════
+// OPENAPI + SCALAR (DESARROLLO Y PRODUCCIÓN)
+// ═══════════════════════════════════════════════════════════
+
+app.MapOpenApi();
+
+app.MapScalarApiReference(options =>
 {
-    app.MapOpenApi();
+    options.WithTitle("BackendGeneral API");
+    options.WithTheme(ScalarTheme.Purple);
 
-    app.MapScalarApiReference(options =>
-    {
-        options.WithTitle("BackendGeneral API");
-        options.WithTheme(ScalarTheme.Purple);
+    options.AddPreferredSecuritySchemes("Bearer");
 
-        // ═══════════════════════════════════════════════
-        // AUTENTICACIÓN GLOBAL
-        // ═══════════════════════════════════════════════
-
-        options.AddPreferredSecuritySchemes("Bearer");
-
-        options.AddHttpAuthentication(
-            "Bearer",
-            scheme =>
-            {
-                scheme.Token = "";
-            }
-        );
-    });
-}
+    options.AddHttpAuthentication(
+        "Bearer",
+        scheme =>
+        {
+            scheme.Token = "";
+        }
+    );
+});
 
 // ═══════════════════════════════════════════════════════════
-// Middleware
+// HEALTH CHECK
+// ═══════════════════════════════════════════════════════════
+
+app.MapGet("/health", () => Results.Ok(new
+{
+    status = "ok",
+    application = "BackendGeneral.Api",
+    environment = app.Environment.EnvironmentName
+}));
+
+// ═══════════════════════════════════════════════════════════
+// MIDDLEWARE
 // ═══════════════════════════════════════════════════════════
 
 app.UseCors("VuesticPolicy");
@@ -170,4 +206,10 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.Run();
+// ═══════════════════════════════════════════════════════════
+// HOSTLESS - PUERTO DINÁMICO
+// ═══════════════════════════════════════════════════════════
+
+var port = Environment.GetEnvironmentVariable("PORT") ?? "8000";
+
+app.Run($"http://0.0.0.0:{port}");

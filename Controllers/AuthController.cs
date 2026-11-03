@@ -1,7 +1,10 @@
+using BackendGeneral.Api.Data;
 using BackendGeneral.Api.DTOs;
 using BackendGeneral.Api.Services;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace BackendGeneral.Api.Controllers;
 
@@ -10,10 +13,12 @@ namespace BackendGeneral.Api.Controllers;
 public class AuthController : ControllerBase
 {
     private readonly AuthService _auth;
+    private readonly AppDbContext _db;
 
-    public AuthController(AuthService auth)
+    public AuthController(AuthService auth, AppDbContext db)
     {
         _auth = auth;
+        _db   = db;
     }
 
     private string? Ip => HttpContext.Connection.RemoteIpAddress?.ToString();
@@ -54,9 +59,10 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> Logout([FromBody] RefreshRequestDto dto)
     {
         if (string.IsNullOrWhiteSpace(dto?.RefreshToken))
-            return NoContent();   // idempotente
+            return NoContent();
 
         await _auth.LogoutAsync(dto.RefreshToken);
         return NoContent();
     }
+
 }

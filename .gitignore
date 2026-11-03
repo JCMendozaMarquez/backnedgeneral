@@ -23,3 +23,7 @@ dist/
 # Archivos temporales
 *.tmp
 *.log
+
+
+*.cache
+*.appsettings.json
