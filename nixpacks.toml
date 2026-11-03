@@ -1,0 +1,5 @@
+[phases.build]
+cmds = ["dotnet publish BackendGeneral.Api.csproj -c Release -o out"]
+
+[start]
+cmd = "dotnet out/BackendGeneral.Api.dll"
