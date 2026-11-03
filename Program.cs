@@ -1,32 +1,42 @@
+
 using System.Text;
 using BackendGeneral.Api.Data;
 using BackendGeneral.Api.Configuration;
 using BackendGeneral.Api.Services;
+using BackendGeneral.Api.Authorization;
+
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Scalar.AspNetCore;
 using Microsoft.OpenApi;
-// backend dinamico par  asignar roles
-using BackendGeneral.Api.Authorization;
-using Microsoft.AspNetCore.Authorization;
+
+using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ═══════════════════════════════════════════════════════════
-// PostgreSQL
-// ═══════════════════════════════════════════════════════════
+// ==========================================================
+// CONFIGURACIÓN DE POSTGRESQL
+// ==========================================================
+
+var connectionString =
+    builder.Configuration.GetConnectionString("DefaultConnection");
+
+if (string.IsNullOrWhiteSpace(connectionString))
+{
+    throw new InvalidOperationException(
+        "No se encontró ConnectionStrings:DefaultConnection."
+    );
+}
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(
-        builder.Configuration.GetConnectionString("DefaultConnection")
-    )
-     .UseSnakeCaseNamingConvention()
+    options.UseNpgsql(connectionString)
+           .UseSnakeCaseNamingConvention()
 );
 
-// ═══════════════════════════════════════════════════════════
-// Controllers + OpenAPI
-// ═══════════════════════════════════════════════════════════
+// ==========================================================
+// CONTROLLERS + OPENAPI
+// ==========================================================
 
 builder.Services.AddControllers();
 
@@ -46,93 +56,100 @@ builder.Services.AddOpenApi(options =>
                 Scheme = "bearer",
                 BearerFormat = "JWT",
                 In = ParameterLocation.Header,
-                Description =
-                    "Ingresa solamente el token JWT. Scalar agregará automáticamente 'Bearer '."
+                Description = "Ingresa tu token JWT."
             };
 
         return Task.CompletedTask;
     });
 });
 
-// ═══════════════════════════════════════════════════════════
-// Servicios de autenticación
-// ═══════════════════════════════════════════════════════════
+// ==========================================================
+// CONFIGURACIÓN JWT
+// ==========================================================
 
 builder.Services.Configure<JwtSettings>(
     builder.Configuration.GetSection("Jwt")
 );
 
-builder.Services.AddScoped<JwtService>();
-builder.Services.AddScoped<AuthService>();
+var jwtKey = builder.Configuration["Jwt:Key"];
+var jwtIssuer = builder.Configuration["Jwt:Issuer"];
+var jwtAudience = builder.Configuration["Jwt:Audience"];
 
-// ═══════════════════════════════════════════════════════════
-// SERVICIOS DE NEGOCIO (6 módulos)
-// ═══════════════════════════════════════════════════════════
+if (string.IsNullOrWhiteSpace(jwtKey) || jwtKey.Length < 32)
+{
+    throw new InvalidOperationException(
+        "Jwt:Key es obligatorio y debe tener al menos 32 caracteres."
+    );
+}
 
-// Helper reutilizable para leer vistas y funciones SQL
-builder.Services.AddScoped<DbViewsService>();
-
-// Módulo 1: Catálogo
-builder.Services.AddScoped<CatalogoService>();
-
-// Módulo 2: Pedidos
-builder.Services.AddScoped<PedidosService>();
-
-// Módulo 3: Cobros y caja
-builder.Services.AddScoped<CobrosCajaService>();
-
-// Módulo 4: Inventario
-builder.Services.AddScoped<InventarioService>();
-
-// Módulo 5: Integraciones (mensajes)
-builder.Services.AddScoped<IntegracionesService>();
-
-// Módulo 6: Reportes
-builder.Services.AddScoped<ReportesService>();
-
-// ═══════════════════════════════════════════════════════════
-// JWT
-// ═══════════════════════════════════════════════════════════
-
-var jwtKey = builder.Configuration["Jwt:Key"]!;
+if (string.IsNullOrWhiteSpace(jwtIssuer) ||
+    string.IsNullOrWhiteSpace(jwtAudience))
+{
+    throw new InvalidOperationException(
+        "Jwt:Issuer y Jwt:Audience son obligatorios."
+    );
+}
 
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
-        options.TokenValidationParameters =
-            new TokenValidationParameters
-            {
-                ValidateIssuer = true,
-                ValidateAudience = true,
-                ValidateLifetime = true,
-                ValidateIssuerSigningKey = true,
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
 
-                ValidIssuer =
-                    builder.Configuration["Jwt:Issuer"],
+            ValidIssuer = jwtIssuer,
+            ValidAudience = jwtAudience,
 
-                ValidAudience =
-                    builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(jwtKey)
+            ),
 
-                IssuerSigningKey =
-                    new SymmetricSecurityKey(
-                        Encoding.UTF8.GetBytes(jwtKey)
-                    )
-            };
+            ClockSkew = TimeSpan.FromMinutes(1)
+        };
     });
 
-// Registra el handler (para saber qué significa cada permiso)
-builder.Services.AddSingleton<IAuthorizationHandler, PermissionHandler>();
+// ==========================================================
+// AUTORIZACIÓN DINÁMICA POR PERMISOS
+// ==========================================================
 
-// Registra el provider que crea policies dinámicamente
-builder.Services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
+builder.Services.AddSingleton<
+    IAuthorizationHandler,
+    PermissionHandler
+>();
 
-// Autorización por defecto (sin policies hardcodeadas)
+builder.Services.AddSingleton<
+    IAuthorizationPolicyProvider,
+    PermissionPolicyProvider
+>();
+
 builder.Services.AddAuthorization();
 
-// ═══════════════════════════════════════════════════════════
+// ==========================================================
+// SERVICIOS DE AUTENTICACIÓN
+// ==========================================================
+
+builder.Services.AddScoped<JwtService>();
+builder.Services.AddScoped<AuthService>();
+
+// ==========================================================
+// SERVICIOS DE NEGOCIO
+// ==========================================================
+
+builder.Services.AddScoped<DbViewsService>();
+builder.Services.AddScoped<CatalogoService>();
+builder.Services.AddScoped<PedidosService>();
+builder.Services.AddScoped<CobrosCajaService>();
+builder.Services.AddScoped<InventarioService>();
+builder.Services.AddScoped<IntegracionesService>();
+builder.Services.AddScoped<ReportesService>();
+
+// ==========================================================
 // CORS
-// ═══════════════════════════════════════════════════════════
+// ==========================================================
 
 builder.Services.AddCors(options =>
 {
@@ -151,20 +168,15 @@ builder.Services.AddCors(options =>
     });
 });
 
-// ═══════════════════════════════════════════════════════════
-// APP
-// ═══════════════════════════════════════════════════════════
+// ==========================================================
+// CONSTRUCCIÓN DE LA APLICACIÓN
+// ==========================================================
 
 var app = builder.Build();
 
-// ═══════════════════════════════════════════════════════════
-// Scalar con hostless
-// ═══════════════════════════════════════════════════════════
-
-
-// ═══════════════════════════════════════════════════════════
-// OPENAPI + SCALAR (DESARROLLO Y PRODUCCIÓN)
-// ═══════════════════════════════════════════════════════════
+// ==========================================================
+// OPENAPI + SCALAR
+// ==========================================================
 
 app.MapOpenApi();
 
@@ -175,18 +187,15 @@ app.MapScalarApiReference(options =>
 
     options.AddPreferredSecuritySchemes("Bearer");
 
-    options.AddHttpAuthentication(
-        "Bearer",
-        scheme =>
-        {
-            scheme.Token = "";
-        }
-    );
+    options.AddHttpAuthentication("Bearer", scheme =>
+    {
+        scheme.Token = "";
+    });
 });
 
-// ═══════════════════════════════════════════════════════════
+// ==========================================================
 // HEALTH CHECK
-// ═══════════════════════════════════════════════════════════
+// ==========================================================
 
 app.MapGet("/health", () => Results.Ok(new
 {
@@ -195,9 +204,9 @@ app.MapGet("/health", () => Results.Ok(new
     environment = app.Environment.EnvironmentName
 }));
 
-// ═══════════════════════════════════════════════════════════
+// ==========================================================
 // MIDDLEWARE
-// ═══════════════════════════════════════════════════════════
+// ==========================================================
 
 app.UseCors("VuesticPolicy");
 
@@ -206,10 +215,10 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-// ═══════════════════════════════════════════════════════════
+// ==========================================================
 // HOSTLESS - PUERTO DINÁMICO
-// ═══════════════════════════════════════════════════════════
+// ==========================================================
 
-var port = Environment.GetEnvironmentVariable("PORT") ?? "8000";
+var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
 
 app.Run($"http://0.0.0.0:{port}");
