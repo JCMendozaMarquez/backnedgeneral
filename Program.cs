@@ -158,45 +158,36 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 
 // ═══════════════════════════════════════════════════════════
-// Scalar con hostless
+// Scalar
 // ═══════════════════════════════════════════════════════════
 
-
-// ═══════════════════════════════════════════════════════════
-// OPENAPI + SCALAR (DESARROLLO Y PRODUCCIÓN)
-// ═══════════════════════════════════════════════════════════
-
-app.MapOpenApi();
-
-app.MapScalarApiReference(options =>
+if (app.Environment.IsDevelopment())
 {
-    options.WithTitle("BackendGeneral API");
-    options.WithTheme(ScalarTheme.Purple);
+    app.MapOpenApi();
 
-    options.AddPreferredSecuritySchemes("Bearer");
+    app.MapScalarApiReference(options =>
+    {
+        options.WithTitle("BackendGeneral API");
+        options.WithTheme(ScalarTheme.Purple);
 
-    options.AddHttpAuthentication(
-        "Bearer",
-        scheme =>
-        {
-            scheme.Token = "";
-        }
-    );
-});
+        // ═══════════════════════════════════════════════
+        // AUTENTICACIÓN GLOBAL
+        // ═══════════════════════════════════════════════
 
-// ═══════════════════════════════════════════════════════════
-// HEALTH CHECK
-// ═══════════════════════════════════════════════════════════
+        options.AddPreferredSecuritySchemes("Bearer");
 
-app.MapGet("/health", () => Results.Ok(new
-{
-    status = "ok",
-    application = "BackendGeneral.Api",
-    environment = app.Environment.EnvironmentName
-}));
+        options.AddHttpAuthentication(
+            "Bearer",
+            scheme =>
+            {
+                scheme.Token = "";
+            }
+        );
+    });
+}
 
 // ═══════════════════════════════════════════════════════════
-// MIDDLEWARE
+// Middleware
 // ═══════════════════════════════════════════════════════════
 
 app.UseCors("VuesticPolicy");
@@ -206,10 +197,4 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-// ═══════════════════════════════════════════════════════════
-// HOSTLESS - PUERTO DINÁMICO
-// ═══════════════════════════════════════════════════════════
-
-var port = Environment.GetEnvironmentVariable("PORT") ?? "8000";
-
-app.Run($"http://0.0.0.0:{port}");
+app.Run();
