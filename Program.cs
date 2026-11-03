@@ -215,10 +215,3 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-// ==========================================================
-// HOSTLESS - PUERTO DINÁMICO
-// ==========================================================
-
-var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
-
-app.Run($"http://0.0.0.0:{port}");
