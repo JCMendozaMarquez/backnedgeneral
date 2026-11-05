@@ -148,11 +148,7 @@ builder.Services.AddScoped<IntegracionesService>();
 builder.Services.AddScoped<ReportesService>();
 
 // ==========================================================
-// CORS
-// ==========================================================
-
-// ==========================================================
-// CORS
+// CONFIGURACIÓN CORS
 // ==========================================================
 
 builder.Services.AddCors(options =>
@@ -172,11 +168,24 @@ builder.Services.AddCors(options =>
             .AllowCredentials();
     });
 });
+
 // ==========================================================
 // CONSTRUCCIÓN DE LA APLICACIÓN
 // ==========================================================
 
 var app = builder.Build();
+
+// ==========================================================
+// MIDDLEWARE
+// ==========================================================
+
+app.UseRouting();
+
+app.UseCors("VuesticPolicy");
+
+app.UseAuthentication();
+
+app.UseAuthorization();
 
 // ==========================================================
 // OPENAPI + SCALAR
@@ -209,14 +218,13 @@ app.MapGet("/health", () => Results.Ok(new
 }));
 
 // ==========================================================
-// MIDDLEWARE
+// CONTROLLERS
 // ==========================================================
 
-app.UseCors("VuesticPolicy");
-
-app.UseAuthentication();
-app.UseAuthorization();
-
 app.MapControllers();
+
+// ==========================================================
+// INICIAR APLICACIÓN
+// ==========================================================
 
 app.Run();
