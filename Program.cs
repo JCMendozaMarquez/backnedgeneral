@@ -151,6 +151,10 @@ builder.Services.AddScoped<ReportesService>();
 // CORS
 // ==========================================================
 
+// ==========================================================
+// CORS
+// ==========================================================
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("VuesticPolicy", policy =>
@@ -160,14 +164,14 @@ builder.Services.AddCors(options =>
                 "http://localhost:5173",
                 "http://localhost:3000",
                 "http://localhost:8080",
-                "http://localhost:5253"
+                "http://localhost:5253",
+                "https://massapizza.netlify.app"
             )
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials();
     });
 });
-
 // ==========================================================
 // CONSTRUCCIÓN DE LA APLICACIÓN
 // ==========================================================
