@@ -398,16 +398,38 @@ public class AppDbContext : DbContext
 
         mb.Entity<TurnoCaja>(e => e.ToTable("turnos_caja"));
 
-        mb.Entity<Pedido>(e =>
-        {
-            e.ToTable("pedidos");
-            e.Property(x => x.Datos).HasColumnType("jsonb");
-            e.HasMany(x => x.Items)
-             .WithOne()
-             .HasForeignKey(i => i.PedidoId)
-             .OnDelete(DeleteBehavior.Cascade);
-        });
+mb.Entity<Pedido>(e =>
+{
+    e.ToTable("pedidos");
+    e.HasKey(x => x.Id);
 
+    // Mapeo de columnas (snake_case)
+    e.Property(x => x.Id).HasColumnName("id");
+    e.Property(x => x.Numero).HasColumnName("numero").ValueGeneratedOnAdd(); // ← CLAVE
+    e.Property(x => x.TerceroId).HasColumnName("tercero_id");
+    e.Property(x => x.UsuarioId).HasColumnName("usuario_id");
+    e.Property(x => x.TurnoId).HasColumnName("turno_id");
+    e.Property(x => x.PromocionId).HasColumnName("promocion_id");
+    e.Property(x => x.TipoServicio).HasColumnName("tipo_servicio");
+    e.Property(x => x.Mesa).HasColumnName("mesa");
+    e.Property(x => x.Origen).HasColumnName("origen");
+    e.Property(x => x.ReferenciaExterna).HasColumnName("referencia_externa");
+    e.Property(x => x.Estado).HasColumnName("estado");
+    e.Property(x => x.Subtotal).HasColumnName("subtotal");
+    e.Property(x => x.Descuento).HasColumnName("descuento");
+    e.Property(x => x.Total).HasColumnName("total");
+    e.Property(x => x.Nota).HasColumnName("nota");
+    e.Property(x => x.Datos).HasColumnName("datos").HasColumnType("jsonb");
+    e.Property(x => x.AnuladoMotivo).HasColumnName("anulado_motivo");
+    e.Property(x => x.CodigoSeguimiento).HasColumnName("codigo_seguimiento");
+    e.Property(x => x.CreatedAt).HasColumnName("created_at");
+    e.Property(x => x.UpdatedAt).HasColumnName("updated_at");
+
+    e.HasMany(x => x.Items)
+     .WithOne()
+     .HasForeignKey(i => i.PedidoId)
+     .OnDelete(DeleteBehavior.Cascade);
+});
         mb.Entity<PedidoItem>(e =>
         {
             e.ToTable("pedido_items");

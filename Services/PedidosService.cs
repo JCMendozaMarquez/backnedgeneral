@@ -19,58 +19,59 @@ public class PedidosService
     // ==================================================
     // CREAR
     // ==================================================
-    public async Task<Pedido> CrearAsync(CrearPedidoDto d, Guid? usuarioId)
+public async Task<Pedido> CrearAsync(CrearPedidoDto d, Guid? usuarioId)
+{
+    TurnoCaja? turno = null;
+    if (usuarioId is not null && _db.Model.FindEntityType(typeof(TurnoCaja)) is not null)
     {
-        // Turno abierto del usuario (si existe). Ojo: usa el DbSet de turnos_caja.
-        // Si todavía no creaste el modelo TurnoCaja, deja turno = null.
-        TurnoCaja? turno = null;
-        if (usuarioId is not null && _db.Model.FindEntityType(typeof(TurnoCaja)) is not null)
-        {
-            turno = await _db.TurnosCaja
-                .FirstOrDefaultAsync(t => t.UsuarioId == usuarioId && t.CerradoEn == null);
-        }
-
-        var pedido = new Pedido
-        {
-            TerceroId = d.TerceroId,
-            UsuarioId = usuarioId,
-            TurnoId = turno?.Id,
-            TipoServicio = d.TipoServicio,
-            Mesa = d.Mesa,
-            Origen = d.Origen,
-            ReferenciaExterna = d.ReferenciaExterna,
-            Descuento = d.Descuento,
-            Nota = d.Nota,
-            Datos = string.IsNullOrWhiteSpace(d.Datos) ? "{}" : d.Datos,
-            Estado = "pendiente",
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow
-        };
-        _db.Pedidos.Add(pedido);
-
-        foreach (var i in d.Items)
-        {
-            _db.PedidoItems.Add(new PedidoItem
-            {
-                PedidoId = pedido.Id,
-                ArticuloId = i.ArticuloId,
-                Descripcion = i.Descripcion,
-                Cantidad = i.Cantidad,
-                PrecioUnitario = i.PrecioUnitario,
-                Descuento = i.Descuento,
-                Opciones = string.IsNullOrWhiteSpace(i.Opciones) ? "[]" : i.Opciones,
-                Nota = i.Nota
-            });
-        }
-
-        await _db.SaveChangesAsync();
-
-        // El trigger de Postgres recalcula subtotal/descuento/total en pedidos.
-        // Recargamos para devolver valores frescos.
-        await _db.Entry(pedido).ReloadAsync();
-        return pedido;
+        turno = await _db.TurnosCaja
+            .FirstOrDefaultAsync(t => t.UsuarioId == usuarioId && t.CerradoEn == null);
     }
 
+    var pedido = new Pedido
+    {
+        TerceroId = d.TerceroId,
+        UsuarioId = usuarioId,
+        TurnoId = turno?.Id,
+        TipoServicio = d.TipoServicio,
+        Mesa = d.Mesa,
+        Origen = d.Origen,
+        ReferenciaExterna = d.ReferenciaExterna,
+        Descuento = d.Descuento,
+        Nota = d.Nota,
+        Datos = string.IsNullOrWhiteSpace(d.Datos) ? "{}" : d.Datos,
+        Estado = "pendiente",
+        CreatedAt = DateTime.UtcNow,
+        UpdatedAt = DateTime.UtcNow
+    };
+    _db.Pedidos.Add(pedido);
+
+    // 1. GUARDAR EL PEDIDO PRIMERO para que se genere el Id
+    await _db.SaveChangesAsync();
+
+    // 2. AHORA que pedido.Id tiene un valor real, crear los items
+    foreach (var i in d.Items)
+    {
+        _db.PedidoItems.Add(new PedidoItem
+        {
+            PedidoId = pedido.Id, // Ahora sí es el Id real
+            ArticuloId = i.ArticuloId,
+            Descripcion = i.Descripcion,
+            Cantidad = i.Cantidad,
+            PrecioUnitario = i.PrecioUnitario,
+            Descuento = i.Descuento,
+            Opciones = string.IsNullOrWhiteSpace(i.Opciones) ? "[]" : i.Opciones,
+            Nota = i.Nota
+        });
+    }
+
+    // 3. GUARDAR LOS ITEMS
+    await _db.SaveChangesAsync();
+
+    // 4. Recargar para obtener los totales calculados por el trigger
+    await _db.Entry(pedido).ReloadAsync();
+    return pedido;
+}
     // ==================================================
     // LISTAR
     // ==================================================
