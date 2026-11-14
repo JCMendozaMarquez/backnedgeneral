@@ -1,8 +1,14 @@
-// Models/Pedido.cs
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace BackendGeneral.Api.Models;
+
 public class Pedido
 {
     public Guid Id { get; set; }
+
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public long Numero { get; set; }
+
     public Guid? TerceroId { get; set; }
     public Guid? UsuarioId { get; set; }
     public Guid? TurnoId { get; set; }
