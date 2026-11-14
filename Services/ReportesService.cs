@@ -90,7 +90,21 @@ public class ReportesService
             : "SELECT * FROM v_stock ORDER BY nombre";
         return _views.QueryViewAsync(sql);
     }
-
+    // ==================================================
+    // MÉTODOS DE PAGO (consulta directa a pagos)
+    // ==================================================
+    public Task<List<Dictionary<string, object?>>> MetodosPagoAsync(
+        DateTime? desde, DateTime? hasta) =>
+        _views.QueryViewAsync(
+            @"SELECT
+                  metodo,
+                  SUM(monto) AS total
+              FROM pagos
+              WHERE (@desde::timestamptz IS NULL OR created_at >= @desde)
+                AND (@hasta::timestamptz IS NULL OR created_at <= @hasta)
+              GROUP BY metodo
+              ORDER BY total DESC",
+            ("desde", desde), ("hasta", hasta));
     // ==================================================
     // DASHBOARD: resumen ejecutivo de un rango
     // ==================================================

@@ -64,7 +64,14 @@ public class ReportesController : ControllerBase
     [HttpGet("costos-productos")]
     public Task<List<Dictionary<string, object?>>> Costos() =>
         _svc.CostosProductosAsync();
-
+    // ==================================================
+    // MÉTODOS DE PAGO
+    // ==================================================
+    [HttpGet("metodos-pago")]
+    public Task<List<Dictionary<string, object?>>> MetodosPago(
+        [FromQuery] DateTime? desde,
+        [FromQuery] DateTime? hasta) =>
+        _svc.MetodosPagoAsync(desde, hasta);
     // ==================================================
     // CAJA POR TURNO
     // ==================================================
