@@ -272,3 +272,4 @@ C:\Users\ADMIN\Desktop\TrabajosExtras\Restaurante\backendgeneral\obj\Debug\net10
 C:\Users\ADMIN\Desktop\TrabajosExtras\Restaurante\backendgeneral\obj\Debug\net10.0\BackendGeneral.Api.genruntimeconfig.cache
 C:\Users\ADMIN\Desktop\TrabajosExtras\Restaurante\backendgeneral\obj\Debug\net10.0\ref\BackendGeneral.Api.dll
 C:\Users\ADMIN\Desktop\TrabajosExtras\Restaurante\backendgeneral\bin\Debug\net10.0\EFCore.NamingConventions.dll
+C:\Users\ADMIN\Desktop\TrabajosExtras\Restaurante\backendgeneral\obj\Debug\net10.0\BackendGeneral.Api.sourcelink.json
