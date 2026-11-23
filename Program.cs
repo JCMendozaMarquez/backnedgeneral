@@ -86,7 +86,7 @@ builder.Services.AddScoped<InventarioService>();
 
 // Módulo 5: Integraciones (mensajes)
 builder.Services.AddScoped<IntegracionesService>();
-
+builder.Services.AddScoped<PedidoParser>(); 
 // Módulo 6: Reportes
 builder.Services.AddScoped<ReportesService>();
 

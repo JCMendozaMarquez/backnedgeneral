@@ -12,10 +12,21 @@ namespace BackendGeneral.Api.Controllers;
 public class IntegracionesController : ControllerBase
 {
     private readonly IntegracionesService _svc;
-    public IntegracionesController(IntegracionesService svc) => _svc = svc;
+    private readonly IConfiguration _config;
+    private readonly ILogger<IntegracionesController> _log;
+
+    public IntegracionesController(
+        IntegracionesService svc,
+        IConfiguration config,
+        ILogger<IntegracionesController> log)
+    {
+        _svc = svc;
+        _config = config;
+        _log = log;
+    }
 
     // ==================================================
-    // MENSAJES
+    // MENSAJES (admin)
     // ==================================================
     [HttpGet("mensajes")]
     [Authorize(Policy = "mensajes.gestionar")]
@@ -37,14 +48,8 @@ public class IntegracionesController : ControllerBase
     [Authorize(Policy = "mensajes.gestionar")]
     public async Task<IActionResult> Crear([FromBody] CrearMensajeDto d)
     {
-        try
-        {
-            return Ok(await _svc.CrearAsync(d));
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(new { error = ex.Message });
-        }
+        try { return Ok(await _svc.CrearAsync(d)); }
+        catch (Exception ex) { return BadRequest(new { error = ex.Message }); }
     }
 
     [HttpPatch("mensajes/{id:guid}/estado")]
@@ -57,26 +62,85 @@ public class IntegracionesController : ControllerBase
     }
 
     // ==================================================
-    // WEBHOOK WHATSAPP (público, sin JWT)
+    // ENTRADA PÚBLICA (sin JWT)
     // ==================================================
-    /// <summary>
-    /// Endpoint que llamará el proveedor (Meta, Twilio, etc.) cuando
-    /// llegue un mensaje. Sin autenticación de usuario: se protege por
-    /// un token compartido en el header (X-Webhook-Secret) que tú
-    /// configures en appsettings. Lo dejo preparado.
-    /// </summary>
+    [HttpPost("mensajes/publico")]
+    [AllowAnonymous]
+    public async Task<IActionResult> CrearPublico([FromBody] CrearMensajePublicoDto d)
+    {
+        try
+        {
+            var m = await _svc.CrearDesdePublicoAsync(d);
+            return Ok(new
+            {
+                mensajeId = m.Id,
+                terceroId = m.TerceroId,
+                telefono = m.Telefono
+            });
+        }
+        catch (ArgumentException ex) { return BadRequest(new { error = ex.Message }); }
+        catch (Exception ex)
+        {
+            _log.LogError(ex, "Error en CrearPublico");
+            return StatusCode(500, new { error = "Error al guardar el mensaje." });
+        }
+    }
+
+    // ==================================================
+    // CONVERTIR MENSAJE → PEDIDO (admin)
+    // ==================================================
+    [HttpPost("mensajes/{id:guid}/convertir-pedido")]
+    [Authorize(Policy = "mensajes.gestionar")]
+    public async Task<IActionResult> ConvertirAPedido(
+        Guid id, [FromBody] ConvertirPedidoDto? d)
+    {
+        try
+        {
+            var pedido = await _svc.ConvertirMensajeEnPedidoAsync(id, d);
+            return pedido is null
+                ? NotFound()
+                : Ok(new { pedidoId = pedido.Id, numero = pedido.Numero });
+        }
+        catch (InvalidOperationException ex) { return BadRequest(new { error = ex.Message }); }
+catch (Exception ex)
+{
+    _log.LogError(ex,
+        "Error convirtiendo mensaje {MensajeId}: {FullError}",
+        id,
+        ex.ToString());
+
+    return StatusCode(500, new
+    {
+        error = "Error al convertir el mensaje en pedido.",
+        detalle = ex.InnerException?.Message ?? ex.Message,
+        errorInterno = ex.InnerException?.InnerException?.Message
+    });
+}
+    }
+
+    // ==================================================
+    // WEBHOOK WhatsApp
+    // ==================================================
     [HttpPost("webhook/whatsapp")]
     [AllowAnonymous]
     public async Task<IActionResult> WebhookWhatsApp(
         [FromBody] WhatsAppWebhookDto d,
-        [FromHeader(Name = "X-Webhook-Secret")] string? secret,
-        [FromServices] IConfiguration config)
+        [FromHeader(Name = "X-Webhook-Secret")] string? secret)
     {
-        var esperado = config["Webhooks:WhatsAppSecret"];
+        var esperado = _config["Webhooks:WhatsAppSecret"];
         if (!string.IsNullOrEmpty(esperado) && secret != esperado)
             return Unauthorized();
 
-        var m = await _svc.ProcesarWebhookWhatsAppAsync(d);
-        return Ok(new { mensajeId = m.Id });
+        try
+        {
+            var m = await _svc.ProcesarWebhookWhatsAppAsync(d);
+            return Ok(new { mensajeId = m.Id });
+        }
+        catch (ArgumentException ex) { return BadRequest(new { error = ex.Message }); }
+        catch (Exception ex)
+        {
+            _log.LogError(ex, "Error en WebhookWhatsApp");
+            return StatusCode(500, new { error = "Error procesando webhook." });
+        }
     }
 }

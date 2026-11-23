@@ -116,8 +116,22 @@ public class CobrosCajaController : ControllerBase
     // ==================================================
     [HttpPost("gastos")]
     [Authorize(Policy = "gastos.registrar")]
-    public async Task<IActionResult> RegistrarGasto([FromBody] CrearGastoDto d) =>
-        Ok(await _svc.RegistrarGastoAsync(UsuarioActual(), d));
+    public async Task<IActionResult> RegistrarGasto([FromBody] CrearGastoDto d)
+    {
+        try
+        {
+            return Ok(await _svc.RegistrarGastoAsync(UsuarioActual(), d));
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new
+            {
+                error = ex.Message,
+                inner = ex.InnerException?.Message,
+                type = ex.GetType().Name
+            });
+        }
+    }
 
     [HttpGet("gastos")]
     [Authorize(Policy = "gastos.registrar")]

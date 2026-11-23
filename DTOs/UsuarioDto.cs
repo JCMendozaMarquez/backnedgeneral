@@ -34,3 +34,9 @@ public class ActualizarUsuarioDto
     public bool IsActive { get; set; }
     public bool IsLocked { get; set; }
 }
+
+public class CambiarContrasenaDto
+{
+    public string CurrentPassword { get; set; } = string.Empty;
+    public string NewPassword { get; set; } = string.Empty;
+}

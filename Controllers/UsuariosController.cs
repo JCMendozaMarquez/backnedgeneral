@@ -36,6 +36,25 @@ public class UsuariosController : ControllerBase
             }).ToListAsync();
         return Ok(list);
     }
+    // traer datos de usuario
+    [HttpGet("me")]
+public async Task<ActionResult<UsuarioDto>> GetMe()
+{
+    var idStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+    if (!Guid.TryParse(idStr, out var id)) return Unauthorized();
+
+    var u = await _db.Usuarios.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
+    if (u == null) return NotFound();
+
+    return Ok(new UsuarioDto
+    {
+        Id = u.Id, Username = u.Username, Email = u.Email,
+        FirstName = u.FirstName, LastName = u.LastName,
+        Phone = u.Phone, AvatarUrl = u.AvatarUrl,
+        IsActive = u.IsActive, IsLocked = u.IsLocked,
+        LastLoginAt = u.LastLoginAt, CreatedAt = u.CreatedAt
+    });
+}
 
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<UsuarioDto>> GetById(Guid id)
@@ -98,6 +117,45 @@ public class UsuariosController : ControllerBase
         await _db.SaveChangesAsync();
         return NoContent();
     }
+
+    [HttpPut("{id:guid}/password")]
+public async Task<IActionResult> ChangePassword(Guid id, CambiarContrasenaDto dto)
+{
+    var user = await _db.Usuarios.FindAsync(id);
+    if (user == null) return NotFound();
+
+    // Validar que la contraseña actual sea correcta
+    if (!BCrypt.Net.BCrypt.Verify(dto.CurrentPassword, user.PasswordHash))
+        return BadRequest(new { message = "La contraseña actual es incorrecta." });
+
+    // Validar nueva contraseña
+    if (string.IsNullOrWhiteSpace(dto.NewPassword) || dto.NewPassword.Length < 8)
+        return BadRequest(new { message = "La nueva contraseña debe tener al menos 8 caracteres." });
+
+    if (dto.CurrentPassword == dto.NewPassword)
+        return BadRequest(new { message = "La nueva contraseña debe ser diferente a la actual." });
+
+    user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.NewPassword);
+    user.UpdatedAt = DateTime.UtcNow;
+
+    await _db.SaveChangesAsync();
+
+    // Revocar refresh tokens para forzar re-login con la nueva contraseña
+    var tokensActivos = await _db.RefreshTokens
+        .Where(rt => rt.UserId == id && rt.RevokedAt == null)
+        .ToListAsync();
+
+    foreach (var rt in tokensActivos)
+        rt.RevokedAt = DateTime.UtcNow;
+
+    if (tokensActivos.Count > 0)
+        await _db.SaveChangesAsync();
+
+    _logger.LogInformation("Contraseña cambiada para {Usuario}. Tokens revocados: {Count}",
+        user.Username, tokensActivos.Count);
+
+    return NoContent();
+}
 
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(Guid id)
