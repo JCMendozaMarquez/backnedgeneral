@@ -208,24 +208,20 @@ app.UseAuthorization();
 // OPENAPI + SCALAR
 // ==========================================================
 
-if (app.Environment.IsDevelopment())
+app.MapOpenApi();
+
+app.MapScalarApiReference(options =>
 {
-    app.MapOpenApi();
+    options.WithTitle("BackendGeneral API");
+    options.WithTheme(ScalarTheme.Purple);
 
-    app.MapScalarApiReference(options =>
+    options.AddPreferredSecuritySchemes("Bearer");
+
+    options.AddHttpAuthentication("Bearer", scheme =>
     {
-        options.WithTitle("BackendGeneral API");
-        options.WithTheme(ScalarTheme.Purple);
-
-        options.AddPreferredSecuritySchemes("Bearer");
-
-        options.AddHttpAuthentication("Bearer", scheme =>
-        {
-            scheme.Token = "";
-        });
+        scheme.Token = "";
     });
-}
-
+});
 // ==========================================================
 // HEALTH CHECK
 // ==========================================================
