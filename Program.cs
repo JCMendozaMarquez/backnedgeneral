@@ -16,7 +16,7 @@ using Scalar.AspNetCore;
 var builder = WebApplication.CreateBuilder(args);
 
 // ==========================================================
-// CONFIGURACIÓN DE POSTGRESQL
+// CONFIGURACIÓN DE POSTGRESQL / SUPABASE
 // ==========================================================
 
 var connectionString =
@@ -90,6 +90,36 @@ if (string.IsNullOrWhiteSpace(jwtIssuer) ||
     );
 }
 
+// ==========================================================
+// SERVICIOS DE NEGOCIO
+// ==========================================================
+
+// Helper para vistas y funciones SQL
+builder.Services.AddScoped<DbViewsService>();
+
+// Módulo 1: Catálogo
+builder.Services.AddScoped<CatalogoService>();
+
+// Módulo 2: Pedidos
+builder.Services.AddScoped<PedidosService>();
+
+// Módulo 3: Cobros y caja
+builder.Services.AddScoped<CobrosCajaService>();
+
+// Módulo 4: Inventario
+builder.Services.AddScoped<InventarioService>();
+
+// Módulo 5: Integraciones
+builder.Services.AddScoped<IntegracionesService>();
+builder.Services.AddScoped<PedidoParser>();
+
+// Módulo 6: Reportes
+builder.Services.AddScoped<ReportesService>();
+
+// ==========================================================
+// AUTENTICACIÓN JWT
+// ==========================================================
+
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -136,18 +166,6 @@ builder.Services.AddScoped<JwtService>();
 builder.Services.AddScoped<AuthService>();
 
 // ==========================================================
-// SERVICIOS DE NEGOCIO
-// ==========================================================
-
-builder.Services.AddScoped<DbViewsService>();
-builder.Services.AddScoped<CatalogoService>();
-builder.Services.AddScoped<PedidosService>();
-builder.Services.AddScoped<CobrosCajaService>();
-builder.Services.AddScoped<InventarioService>();
-builder.Services.AddScoped<IntegracionesService>();
-builder.Services.AddScoped<ReportesService>();
-
-// ==========================================================
 // CONFIGURACIÓN CORS
 // ==========================================================
 
@@ -184,27 +202,29 @@ app.UseRouting();
 app.UseCors("VuesticPolicy");
 
 app.UseAuthentication();
-
 app.UseAuthorization();
 
 // ==========================================================
 // OPENAPI + SCALAR
 // ==========================================================
 
-app.MapOpenApi();
-
-app.MapScalarApiReference(options =>
+if (app.Environment.IsDevelopment())
 {
-    options.WithTitle("BackendGeneral API");
-    options.WithTheme(ScalarTheme.Purple);
+    app.MapOpenApi();
 
-    options.AddPreferredSecuritySchemes("Bearer");
-
-    options.AddHttpAuthentication("Bearer", scheme =>
+    app.MapScalarApiReference(options =>
     {
-        scheme.Token = "";
+        options.WithTitle("BackendGeneral API");
+        options.WithTheme(ScalarTheme.Purple);
+
+        options.AddPreferredSecuritySchemes("Bearer");
+
+        options.AddHttpAuthentication("Bearer", scheme =>
+        {
+            scheme.Token = "";
+        });
     });
-});
+}
 
 // ==========================================================
 // HEALTH CHECK

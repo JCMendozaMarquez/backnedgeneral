@@ -10,7 +10,10 @@ programa
 *.a
 *.so
 *.dll
-
+bin/
+obj/
+*.user
+.vs/
 # Carpetas de compilación
 build/
 bin/
