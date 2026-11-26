@@ -224,7 +224,7 @@ public class IntegracionesService
         var pedido = new Pedido
         {
             TerceroId = terceroId,
-            Estado = "pendiente",
+            Estado = "listo",
             Origen = origen,
             TipoServicio = tipoServicio,
             Subtotal = total,

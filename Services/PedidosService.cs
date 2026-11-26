@@ -40,7 +40,7 @@ public async Task<Pedido> CrearAsync(CrearPedidoDto d, Guid? usuarioId)
         Descuento = d.Descuento,
         Nota = d.Nota,
         Datos = string.IsNullOrWhiteSpace(d.Datos) ? "{}" : d.Datos,
-        Estado = "pendiente",
+        Estado = "listo",
         CreatedAt = DateTime.UtcNow,
         UpdatedAt = DateTime.UtcNow
     };
